@@ -1,0 +1,31 @@
+const path = require("path");
+
+const fileExtLimiter = (allowedExtArray) => {
+  return (req, res, next) => {
+    const files = req.files;
+
+    const fileExtensions = [];
+    Object.keys(files).forEach((key) => {
+      fileExtensions.push(path.extname(files[key].name)); //the .name is a property of each file, so we are getting the extension name of the file from its name
+    });
+
+    // Are the file extension allowed?
+    const allowed = fileExtensions.every((ext) =>
+      allowedExtArray.includes(ext)
+    );
+
+    if (!allowed) {
+      const message =
+        `Upload failed. Only ${allowedExtArray.toString()} files allowed.`.replaceAll(
+          ",",
+          ", "
+        );
+
+      return res.status(422).json({ status: "error", message });
+    }
+
+    next();
+  };
+};
+
+module.exports = fileExtLimiter;
